@@ -9,13 +9,13 @@
 	</head>
 	<body>
 		{% csrf_token %}
+		<div class="biglogo" style="position: fixed; right: 0; top: 0;"><img src="{% static 'images/NewLOGO.png' %}"></img></div>
 		<div class="container-fluid">
-			<div class="header"><img height="80px" style="margin-top: 10px; margin-bottom: 10px;" src="{% static 'images/songdumpCover.png' %}"></img><p><b>Give a place a vibe</b></p></div>
-			<div class="browser-title">Add a song to this Node:</div>
+			<div class="browser-title" style="margin-top: 10px;"><h3>Add a song to this Node</h3></div>
 			<div class="browse"></div>
 			<div class="playlist"></div>
 			<div class="resultsdiv"></div>
-			<div class="footer"><img style="width: 100px; height: 100px;" src="{% static 'images/logo.png' %}"></img></div>
+			<div class="footer"><a href="javascript:updateSongs()"><img style="width: 100px; height: 100px;" src="{% static 'images/logo.png' %}"></img></a></div>
 		</div>
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<script src="{% static 'js/jquery.min.js' %}"></script>

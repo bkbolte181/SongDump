@@ -4,6 +4,8 @@ from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth.models import User
 
+from random import randrange
+
 from django.views.decorators.csrf import csrf_exempt
 
 from react import jsx
@@ -36,7 +38,7 @@ def getClosestNode(latitude, longitude):
 	n = Node.objects.filter(latitude__lt=latitude+0.0027, latitude__gt=latitude-0.0027, longitude__lt=longitude+0.0027, longitude__gt=longitude-0.00027)
 	return n.order_by('latitude', 'longitude').first() or None
 
-def getSongData(request, part='songs'):
+def getSongData(request, part='songs', page=1):
 	''' Retrieve data related to a single song id '''
 	auth = MusicDealersAuth.objects.first()
 	url = 'https://api.musicdealers.com/' + part
@@ -45,6 +47,7 @@ def getSongData(request, part='songs'):
 		data['songs[]'] = int(request.POST['song_id'])
 	if 'genre' in request.POST:
 		data['genre[]'] = request.POST['genre']
+	data['page'] = page
 	url_data = urllib.urlencode(data)
 	url = url + '?' + url_data
 	req = urllib2.Request(url, headers={'X-Auth-Token': auth.auth_token})
@@ -98,23 +101,23 @@ def add_song(request):
 			song = getSongData(request)
 			result = {'error': 'false'}
 			result.update(song)
+			print song
 			song = song['results'][0]
 			
 			latitude = float(request.POST['latitude'])
 			longitude = float(request.POST['longitude'])
 			node = getClosestNode(latitude, longitude)
 			if not node:
-				''' There are no nodes within range '''
+				print 'no node'
 				return HttpResponse(json.dumps({'error': 'true'}), content_type='application/json')
 			
-			if not Song.objects.filter(md_id__exact=song['id']).count():
-				m = Song.objects.create(url=song['mp3_file_path'], name=song['title'], votes=0, md_id=song['id'], node=node)
-				m.save()
-				while node.songs.count() > 5:
-					node.songs.last().delete()
-			
+			m = Song.objects.create(url=song['mp3_file_path'], name=song['title'], votes=0, md_id=song['id'], node=node)
+			m.save()
+			while node.songs.count() > 5:
+				node.songs.all()[randrange(5)].delete()
 			return HttpResponse(json.dumps(result), content_type='application/json')
-		except:
+		except Exception, e:
+			print str(e)
 			return HttpResponse(json.dumps({'error': 'true'}), content_type='application/json')
 	else:
 		raise Http404
@@ -122,7 +125,7 @@ def add_song(request):
 def browse(request):
 	if request.is_ajax():
 		try:
-			songs = getSongData(request)
+			songs = getSongData(request, page=randrange(4342))
 			result = {'error': 'false'}
 			result.update(songs)
 			return HttpResponse(json.dumps(result), content_type='application/json')
@@ -138,8 +141,8 @@ def vote(request):
 			latitude = float(request.POST['latitude'])
 			longitude = float(request.POST['longitude'])
 			vote = request.POST['vote']
-			node = getClosestNode(latitude, longitude)
-			current_song = node.songs.last()
+			id = request.POST['song']
+			current_song = Song.objects.get(id=id)
 			if vote == 'down':
 				current_song.votes = current_song.votes - 1
 				current_song.save()

@@ -1,3 +1,7 @@
+@font-face {
+	font-family: 'DBL';
+	src: url('../font/devil_breeze/DevilBreezeBold.ttf');
+}
 .footer {
 	text-align: center;
 	position: fixed;
@@ -9,4 +13,8 @@ audio {
 }
 .playback {
 	cursor: pointer;
+}
+html, div {
+	font-family: 'DBL';
+	letter-spacing: 2px;
 }

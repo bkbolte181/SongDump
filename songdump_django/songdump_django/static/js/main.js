@@ -2,35 +2,7 @@ $(document).ready(function() {
 	// Pass the current location and get the current song in the playlist
 	updateSongs()
 	browse()
-	addTooltips()
 })
-
-function addTooltips() {
-	$('.tooltip').each(function(index) {
-		var pos = $(this).offset();
-		var tw = pos.left + $(this).width() + 5;
-		var th = pos.top;
-		$(this).append('<div class="tooltip-text">' + $(this).attr('tooltip') + '</div>');
-		$(this).css({
-			'cursor': 'default',
-		});
-		$(this).children('.tooltip-text').each(function(index) {
-			$(this).css({
-				'display': 'none',
-				'font-size': '10px',
-				'position': 'fixed',
-				'background-color': 'black',
-				'color': 'white',
-				'padding': '2px 4px 2px 4px',
-				'max-width': '200px',
-			});
-			$(this).offset({
-				top: th,
-				left: tw,
-			});
-		});
-	});
-}
 
 function updateSongs() {
 	if (navigator.geolocation) {
@@ -52,7 +24,7 @@ function updateSongs() {
 						for (var song in data.songs) {
 							// Loop through returned songs and print out some information about them
 							mysong = data.songs[song]
-							$('.playlist').append('<div onclick="playSong(' + mysong.id + ',this)" class="playback"></div><audio id="' + mysong.id + '" controls><source src="' + mysong.url + '" type="audio/mpeg" /></audio>');
+							$('.playlist').append('<div rel="tooltip" title="' + mysong.name + ' (' + mysong.votes + ')" onclick="playSong(' + mysong.id + ',this)" class="playback"></div><div class="voting ' + mysong.id + '">' + mysong.name + ' <a href="javascript:vote(\'up\',' + mysong.id + ')"><span class="glyphicon glyphicon-chevron-up"></span></a><a href="javascript:vote(\'down\',' + mysong.id + ')"><span class="glyphicon glyphicon-chevron-down"></span></a><audio id="' + mysong.id + '" controls><source src="' + mysong.url + '" type="audio/mpeg" /></audio>');
 						}
 						$('.playback').each(function() {
 							var divsize = 50; //((Math.random()*100) + 50).toFixed();
@@ -69,6 +41,7 @@ function updateSongs() {
 								'left': posx+'px',
 							});
 						});
+						$('[rel=tooltip]').tooltip()
 					}
 				}
 			});
@@ -130,7 +103,8 @@ function addSong(id) {
 	}
 }
 
-function vote(val) {
+function vote(val, id) {
+	$('.'+id).css({'display': 'none'});
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(function(position) {
 			// If the user's position was found successfully
@@ -141,10 +115,11 @@ function vote(val) {
 					csrfmiddlewaretoken:document.getElementsByName('csrfmiddlewaretoken')[0].value,
 					latitude: position.coords.latitude, // Current user's latitude
 					longitude: position.coords.longitude, // Current user's longitude
-					vote: val
+					vote: val,
+					song: id,
 				},
 				success: function(data) {
-					updateSongs()
+					obj.style.display = 'none';
 				}
 			});
 		}, function() {
@@ -163,15 +138,3 @@ function playSong(id,playbtn) {
 		playbtn.style.opacity = '1';
 	}
 }
-
-$('.tooltip').mouseover(function() {
-	$(this).children('.tooltip-text').each(function(index) {
-		$(this).css({
-			'display': 'block',
-		});
-	});
-});
-
-$('.tooltip').mouseout(function() {
-	$(this).children('.tooltip-text').css('display', 'none');
-});
