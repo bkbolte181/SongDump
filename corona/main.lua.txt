@@ -1,0 +1,1 @@
+local myTextObject = display.newText( "Hellow World!", 160, 40, "Ariel", 60 )
