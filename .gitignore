@@ -10,3 +10,10 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+venv/
+psycopg2-2.5.4.win-amd64-py2.7-pg9.3.5-release.exe
+PyV8-1.0-preview-r446.win-amd64-py2.7.exe
+db.sqlite3
+*.pyc
+migrations/
